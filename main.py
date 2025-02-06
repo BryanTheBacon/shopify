@@ -97,6 +97,5 @@ if __name__ == '__main__':
     Jack = Buyer("Jack", "Paris", "France", [15, -3], laptop, 1)
     Kevin = Buyer("Kevin", "New York", "US", [4,-3], laptop, 5)
     Chris = Buyer("Chris", "Ottawa", "Canada", [2.5,0], laptop, 1)
-    deliveryStrategy = DeliveryStrategy(Kevin, ["stockAvailability", "closestToBuyer", "shipWithinCountry"])
+    deliveryStrategy = DeliveryStrategy(Tom, ["shipWithinCountry", "stockAvailability", "closestToBuyer"])
     print(deliveryStrategy.run())
-    print()
