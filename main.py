@@ -41,27 +41,25 @@ class DeliveryStrategy:
                 availableWarehouses.append(warehouse.city)
             else:
                 self.buyer.product.warehouses.pop(warehouse.city)
-        print(self.buyer.product.warehouses.keys())
         return availableWarehouses
 
-    def shipWithinCountry(self, buyer, product, availableList):
+    def shipWithinCountry(self):
         availableWarehouses = []
-        for warehouse in product.warehouses.values():
-            if warehouse.country == buyer.country:
+        product = self.buyer.product
+        for warehouse in list(product.warehouses.values()):
+            if warehouse.country == self.buyer.country:
                 availableWarehouses.append(warehouse.city)
+            else:
+                self.buyer.product.warehouses.pop(warehouse.city)
         return availableWarehouses
 
-    def closestToBuyer(self, buyer, product):
+    def closestToBuyer(self):
+        product = self.buyer.product
         minDistance = ["random", 99999]
-        for warehouse in product.warehouses.values():
+        for warehouse in list(product.warehouses.values()):
             warehouseCoords = warehouse.coordinates
-            buyerCoords = buyer.coordinates
-            xCoordDiff = buyerCoords[0] - warehouseCoords[0]
-            yCoordDiff = buyerCoords[1] - warehouseCoords[1]
-            squareFirst = math.pow(xCoordDiff, 2)
-            squareSecond = math.pow(yCoordDiff, 2)
-            distance = math.sqrt(math.pow(warehouseCoords[0], 2) + math.pow(warehouseCoords[1], 2))
-            distance = math.sqrt(squareFirst + squareSecond)
+            buyerCoords = self.buyer.coordinates
+            distance = math.sqrt(math.pow(warehouseCoords[0] - buyerCoords[0], 2) + math.pow(warehouseCoords[1] - buyerCoords[1], 2))
             if distance < minDistance[1]:
                 minDistance = [warehouse.city, distance]
         return product.warehouses[minDistance[0]].city
@@ -73,8 +71,12 @@ if __name__ == '__main__':
     warehouse3 = Warehouse("Seattle", "US", [-2,1], 5)
     warehouse4 = Warehouse("London","UK", [10,3], 10)
     laptop = Product("laptop", {"Toronto" : warehouse1, "Montreal" : warehouse2, "Seattle" : warehouse3, "London" : warehouse4})
-    Tom = Buyer("Tom", "Vancouver", "Canada", [-2,5], laptop, 5)
-    Jack = Buyer("Jack", "Paris", "France", [15, -3], laptop, 100)
-    deliveryStrategy = DeliveryStrategy(Jack)
+    Tom = Buyer("Tom", "Vancouver", "Canada", [-2,5], laptop, 1)
+    Jack = Buyer("Jack", "Paris", "France", [15, -3], laptop, 1)
+    Kevin = Buyer("Kevin", "New York", "US", [4,-3], laptop, 5)
+    Chris = Buyer("Chris", "Ottawa", "Canada", [2.5,0], laptop, 1)
+    deliveryStrategy = DeliveryStrategy(Chris)
     print(deliveryStrategy.stockAvailability())
+    print(deliveryStrategy.shipWithinCountry())
+    print(deliveryStrategy.closestToBuyer())
 
