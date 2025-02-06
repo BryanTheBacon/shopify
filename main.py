@@ -7,6 +7,8 @@ Warehouse -> product, country, coordinates x and y, stock (quantity)
 """
 import math
 
+from numpy.matlib import empty
+
 
 class Buyer:
     def __init__(self, name, city, country, coordinates, product, quantity):
@@ -30,8 +32,10 @@ class Warehouse:
         self.stock = stock
 
 class DeliveryStrategy:
-    def __init__(self, buyer):
+    def __init__(self, buyer, priorityList):
         self.buyer = buyer
+        self.priorityList = priorityList
+        self.correctWarehouse = None
 
     def stockAvailability(self):
         quantityFromBuyer = self.buyer.quantity
@@ -62,7 +66,25 @@ class DeliveryStrategy:
             distance = math.sqrt(math.pow(warehouseCoords[0] - buyerCoords[0], 2) + math.pow(warehouseCoords[1] - buyerCoords[1], 2))
             if distance < minDistance[1]:
                 minDistance = [warehouse.city, distance]
+        self.buyer.product.warehouses = {minDistance[0]: product.warehouses[minDistance[0]]}
         return product.warehouses[minDistance[0]].city
+
+    def run(self):
+        for value in self.priorityList:
+            match value:
+                case "stockAvailability":
+                    value = self.stockAvailability()
+                    if value:
+                        correctWarehouse = value
+                case "shipWithinCountry":
+                    value = self.shipWithinCountry()
+                    if value:
+                        correctWarehouse = value
+                case "closestToBuyer":
+                    value = self.closestToBuyer()
+                    if value:
+                        correctWarehouse = value
+        return correctWarehouse
 
 
 if __name__ == '__main__':
@@ -71,12 +93,10 @@ if __name__ == '__main__':
     warehouse3 = Warehouse("Seattle", "US", [-2,1], 5)
     warehouse4 = Warehouse("London","UK", [10,3], 10)
     laptop = Product("laptop", {"Toronto" : warehouse1, "Montreal" : warehouse2, "Seattle" : warehouse3, "London" : warehouse4})
-    Tom = Buyer("Tom", "Vancouver", "Canada", [-2,5], laptop, 1)
+    Tom = Buyer("Tom", "Vancouver", "Canada", [-2,5], laptop, 6)
     Jack = Buyer("Jack", "Paris", "France", [15, -3], laptop, 1)
     Kevin = Buyer("Kevin", "New York", "US", [4,-3], laptop, 5)
     Chris = Buyer("Chris", "Ottawa", "Canada", [2.5,0], laptop, 1)
-    deliveryStrategy = DeliveryStrategy(Chris)
-    print(deliveryStrategy.stockAvailability())
-    print(deliveryStrategy.shipWithinCountry())
-    print(deliveryStrategy.closestToBuyer())
-
+    deliveryStrategy = DeliveryStrategy(Kevin, ["stockAvailability", "closestToBuyer", "shipWithinCountry"])
+    print(deliveryStrategy.run())
+    print()
